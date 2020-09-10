@@ -18,13 +18,11 @@ package geotrellis.raster.io.geotiff.reader
 
 import geotrellis.raster._
 import geotrellis.raster.io.geotiff._
+
 import geotrellis.raster.testkit._
+import org.scalatest.funspec.AnyFunSpec
 
-import org.scalatest._
-
-class MultibandGeoTiffReaderSpec extends FunSpec
-    with RasterMatchers
-    with GeoTiffTestUtils {
+class MultibandGeoTiffReaderSpec extends AnyFunSpec with RasterMatchers with GeoTiffTestUtils {
 
   describe("Reading geotiffs with INTERLEAVE=PIXEL") {
     it("Uncompressed, Stripped") {
@@ -113,9 +111,9 @@ class MultibandGeoTiffReaderSpec extends FunSpec
         val CellSize(w, h) = cellSize
 
         val seq = for {
-          wp <- (w / 2 + w / 4) until (w - w / 100) by 100
-          hp <- (h / 2 + h / 4) until (h - h / 100) by 100
-        } yield CellSize(wp, hp)
+          wp <- Range.BigDecimal(w / 2 + w / 4, w - w / 100, 100)
+          hp <- Range.BigDecimal(h / 2 + h / 4, h - h / 100, 100)
+        } yield CellSize(wp.toDouble, hp.toDouble)
 
         seq.toList
       }

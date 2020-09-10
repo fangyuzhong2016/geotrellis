@@ -24,26 +24,26 @@ import geotrellis.raster.io.geotiff.compression.NoCompression
 import geotrellis.raster.io.geotiff._
 import geotrellis.raster.io.geotiff.reader.GeoTiffReader
 import geotrellis.raster.prototype.TilePrototypeMethods
-import geotrellis.spark._
-import geotrellis.spark.io._
-import geotrellis.spark.io.cog._
-import geotrellis.spark.io.index._
-import geotrellis.spark.io.json._
+import geotrellis.layer._
+import geotrellis.store._
+import geotrellis.store.cog.{COGCollectionLayerReader, COGValueReader}
+import geotrellis.store.index._
+import geotrellis.spark.store.cog._
 import geotrellis.spark.testkit.io._
 import geotrellis.spark.testkit.testfiles.cog.COGTestFiles
-import geotrellis.util._
-
+import _root_.io.circe._
 import org.apache.spark.rdd.RDD
+
 import org.scalatest._
-import spray.json._
-import spray.json.DefaultJsonProtocol._
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.funspec.AnyFunSpec
 
 import scala.reflect._
 
 abstract class COGPersistenceSpec[
-  K: SpatialComponent: Ordering: Boundable: JsonFormat: ClassTag,
-  V <: CellGrid: GeoTiffReader: ? => TileMergeMethods[V]: ? => TilePrototypeMethods[V]: ? => TileCropMethods[V]: ClassTag: GeoTiffBuilder
-] extends FunSpec with Matchers with BeforeAndAfterAll {
+  K: SpatialComponent: Ordering: Boundable: Encoder: Decoder: ClassTag,
+  V <: CellGrid[Int]: GeoTiffReader: * => TileMergeMethods[V]: * => TilePrototypeMethods[V]: * => TileCropMethods[V]: ClassTag: GeoTiffBuilder
+] extends AnyFunSpec with Matchers with BeforeAndAfterAll {
 
   type TestReader = COGLayerReader[LayerId]
   type TestWriter = COGLayerWriter

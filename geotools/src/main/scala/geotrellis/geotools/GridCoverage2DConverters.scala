@@ -16,7 +16,7 @@
 
 package geotrellis.geotools
 
-import geotrellis.proj4.{CRS, LatLng}
+import geotrellis.proj4.CRS
 import geotrellis.raster._
 import geotrellis.raster.io.geotiff.util._
 import geotrellis.vector.Extent
@@ -27,7 +27,7 @@ import org.geotools.coverage.GridSampleDimension
 import org.geotools.coverage.grid._
 import org.geotools.geometry.Envelope2D
 import org.geotools.referencing.{CRS => GeoToolsCRS}
-import org.geotools.resources.coverage.CoverageUtilities
+import org.geotools.coverage.util.CoverageUtilities
 import org.geotools.util.NumberRange
 import org.opengis.coverage.SampleDimensionType
 import org.opengis.referencing.crs.CoordinateReferenceSystem

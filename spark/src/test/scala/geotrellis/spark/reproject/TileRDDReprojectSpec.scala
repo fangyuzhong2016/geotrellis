@@ -19,27 +19,25 @@ package geotrellis.spark.reproject
 import geotrellis.raster._
 import geotrellis.raster.io.geotiff._
 import geotrellis.raster.resample._
-import geotrellis.raster.reproject._
 import geotrellis.raster.reproject.Reproject.{Options => RasterReprojectOptions}
+import geotrellis.layer._
 import geotrellis.spark._
 import geotrellis.spark.reproject.Reproject.Options
-import geotrellis.spark.tiling._
 import geotrellis.spark.testkit._
 import geotrellis.vector._
-
 import geotrellis.proj4._
 
 import spire.syntax.cfor._
-
 import org.apache.spark._
-import org.scalatest.FunSpec
 
-class TileRDDReprojectSpec extends FunSpec with TestEnvironment {
+import org.scalatest.funspec.AnyFunSpec
+
+class TileRDDReprojectSpec extends AnyFunSpec with TestEnvironment {
 
   describe("TileRDDReproject") {
     val path = "raster/data/aspect.tif"
     val gt = SinglebandGeoTiff(path)
-    val originalRaster = gt.raster.resample(500, 500)
+    val originalRaster = gt.raster.mapTile(_.toArrayTile).resample(500, 500)
 
     // import geotrellis.raster.render._
     // val rainbow = ColorMap((0.0 to 360.0 by 1.0).map{ deg => (deg, HSV.toRGB(deg, 1.0, 1.0)) }.toMap)
@@ -84,7 +82,7 @@ class TileRDDReprojectSpec extends FunSpec with TestEnvironment {
       val actual =
         actualRdd.stitch
 
-      actualRdd.map { case (_, tile) => tile.dimensions == (25, 25) }.reduce(_ && _) should be (true)
+      actualRdd.map { case (_, tile) => tile.dimensions == Dimensions(25, 25) }.reduce(_ && _) should be (true)
 
       // actual.tile.renderPng(rainbow).write("actual.png")
       // val errorTile = IntArrayTile.ofDim(expected.tile.cols, expected.tile.rows)
@@ -101,10 +99,10 @@ class TileRDDReprojectSpec extends FunSpec with TestEnvironment {
 
       // Account for tiles being a bit bigger then the actual result
       actual.extent.covers(expected.extent) should be (true)
-      actual.rasterExtent.extent.xmin should be (expected.rasterExtent.extent.xmin +- 0.00001)
-      actual.rasterExtent.extent.ymax should be (expected.rasterExtent.extent.ymax +- 0.00001)
-      actual.rasterExtent.cellwidth should be (expected.rasterExtent.cellwidth +- 0.00001)
-      actual.rasterExtent.cellheight should be (expected.rasterExtent.cellheight +- 0.00001)
+      actual.rasterExtent.extent.xmin should be (expected.raster.rasterExtent.extent.xmin +- 0.00001)
+      actual.rasterExtent.extent.ymax should be (expected.raster.rasterExtent.extent.ymax +- 0.00001)
+      actual.rasterExtent.cellwidth should be (expected.raster.rasterExtent.cellwidth +- 0.00001)
+      actual.rasterExtent.cellheight should be (expected.raster.rasterExtent.cellheight +- 0.00001)
 
       val expectedTile = expected.tile
       val actualTile = actual.tile
@@ -185,10 +183,10 @@ class TileRDDReprojectSpec extends FunSpec with TestEnvironment {
 
       // Account for tiles being a bit bigger then the actual result
       actual.extent.covers(expected.extent) should be (true)
-      actual.rasterExtent.extent.xmin should be (expected.rasterExtent.extent.xmin +- 0.00001)
-      actual.rasterExtent.extent.ymax should be (expected.rasterExtent.extent.ymax +- 0.00001)
-      actual.rasterExtent.cellwidth should be (expected.rasterExtent.cellwidth +- 0.00001)
-      actual.rasterExtent.cellheight should be (expected.rasterExtent.cellheight +- 0.00001)
+      actual.rasterExtent.extent.xmin should be (expected.raster.rasterExtent.extent.xmin +- 0.00001)
+      actual.rasterExtent.extent.ymax should be (expected.raster.rasterExtent.extent.ymax +- 0.00001)
+      actual.rasterExtent.cellwidth should be (expected.raster.rasterExtent.cellwidth +- 0.00001)
+      actual.rasterExtent.cellheight should be (expected.raster.rasterExtent.cellheight +- 0.00001)
 
       val expectedTile = expected.tile
       val actualTile = actual.tile
@@ -243,7 +241,7 @@ class TileRDDReprojectSpec extends FunSpec with TestEnvironment {
       // import geotrellis.raster.crop._
       // import geotrellis.raster.merge._
       // import geotrellis.raster.prototype._
-       
+
       // val st1 = implicitly[Stitcher[Tile]]
       // val st2 = implicitly[Stitcher[TileFeature[Tile, Int]]]
       // val st3 = implicitly[RasterRegionReproject[TileFeature[Tile, Int]]]
@@ -266,10 +264,10 @@ class TileRDDReprojectSpec extends FunSpec with TestEnvironment {
 
       // Account for tiles being a bit bigger then the actual result
       actual.extent.covers(expected.extent) should be (true)
-      actual.rasterExtent.extent.xmin should be (expected.rasterExtent.extent.xmin +- 0.00001)
-      actual.rasterExtent.extent.ymax should be (expected.rasterExtent.extent.ymax +- 0.00001)
-      actual.rasterExtent.cellwidth should be (expected.rasterExtent.cellwidth +- 0.00001)
-      actual.rasterExtent.cellheight should be (expected.rasterExtent.cellheight +- 0.00001)
+      actual.rasterExtent.extent.xmin should be (expected.raster.rasterExtent.extent.xmin +- 0.00001)
+      actual.rasterExtent.extent.ymax should be (expected.raster.rasterExtent.extent.ymax +- 0.00001)
+      actual.rasterExtent.cellwidth should be (expected.raster.rasterExtent.cellwidth +- 0.00001)
+      actual.rasterExtent.cellheight should be (expected.raster.rasterExtent.cellheight +- 0.00001)
 
       val expectedTile = expected.tile
       val actualTile = actual.tile

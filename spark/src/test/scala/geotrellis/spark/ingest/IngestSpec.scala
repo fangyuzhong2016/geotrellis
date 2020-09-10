@@ -17,20 +17,20 @@
 package geotrellis.spark.ingest
 
 import geotrellis.vector._
+import geotrellis.layer._
 import geotrellis.spark._
-import geotrellis.spark.tiling._
-import geotrellis.spark.io.hadoop._
+import geotrellis.spark.store.hadoop._
 import geotrellis.proj4._
 import geotrellis.spark.testkit._
 
 import org.apache.hadoop.fs.Path
-import org.scalatest._
+
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.funspec.AnyFunSpec
 
 import scala.collection.mutable
 
-class IngestSpec extends FunSpec
-  with Matchers
-  with TestEnvironment {
+class IngestSpec extends AnyFunSpec with Matchers with TestEnvironment {
   describe("Ingest") {
     it("should read GeoTiff with overrided input CRS") {
       val source = HadoopGeoTiffRDD.spatial(new Path(inputHome, "all-ones.tif"), HadoopGeoTiffRDD.Options(crs = Some(CRS.fromEpsgCode(3857))))

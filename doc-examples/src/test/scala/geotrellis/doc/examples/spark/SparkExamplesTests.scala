@@ -18,14 +18,17 @@ package geotrellis.doc.examples.spark
 
 import geotrellis.raster._
 import geotrellis.raster.testkit._
+import geotrellis.layer.{SpatialKey, SpaceTimeKey, TemporalKey}
 import geotrellis.spark._
 import geotrellis.spark.testkit._
 import geotrellis.spark.testkit.TestEnvironment
 
 import org.joda.time._
-import org.scalatest._
 
-class SparkExamplesTests extends FunSuite with Matchers with TestEnvironment with TileLayerRDDBuilders with TileBuilders {
+import org.scalatest.funsuite.AnyFunSuite
+import org.scalatest.matchers.should.Matchers
+
+class SparkExamplesTests extends AnyFunSuite with Matchers with TestEnvironment with TileLayerRDDBuilders with TileBuilders {
   implicit def longToTemporalKey(l: Long) = TemporalKey(l)
 
   test("Applying a threshold and then median filter on multiband imagery in an RDD layer") {

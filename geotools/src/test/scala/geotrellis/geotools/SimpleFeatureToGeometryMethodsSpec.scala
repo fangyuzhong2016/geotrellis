@@ -19,20 +19,18 @@ package geotrellis.geotools
 import geotrellis.proj4.LatLng
 import geotrellis.vector._
 
-import org.scalatest._
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.funspec.AnyFunSpec
 
-
-class SimpleFeatureToGeometryMethodsSpec
-    extends FunSpec
-    with Matchers {
+class SimpleFeatureToGeometryMethodsSpec extends AnyFunSpec with Matchers {
 
   describe("The .toGeometry Extension Methods") {
 
     val point = Point(0, 1)
-    val line = Line(Point(0, 0), Point(3, 3))
+    val line = LineString(Point(0, 0), Point(3, 3))
     val polygon = Polygon(Point(0, 0), Point(4, 0), Point(0, 3), Point(0, 0))
     val multiPoint = MultiPoint(Point(0, 0), Point(4, 0), Point(0, 3), Point(0, 0))
-    val multiLine = MultiLine(Line(Point(0, 0), Point(4, 0)), Line(Point(0, 3), Point(0, 0)))
+    val multiLine = MultiLineString(LineString(Point(0, 0), Point(4, 0)), LineString(Point(0, 3), Point(0, 0)))
     val multiPolygon = MultiPolygon(Polygon(Point(0, 0), Point(5, 0), Point(0, 12), Point(0, 0)))
 
     val crs = LatLng
@@ -48,7 +46,7 @@ class SimpleFeatureToGeometryMethodsSpec
 
     it("should work on Features of Lines") {
       val simpleFeature = GeometryToSimpleFeature(line, Some(crs), nonEmptyList)
-      val actual: Line = simpleFeature.toGeometry[Line]
+      val actual: LineString = simpleFeature.toGeometry[LineString]
       val expected = line
       actual should be (expected)
     }
@@ -69,7 +67,7 @@ class SimpleFeatureToGeometryMethodsSpec
 
     it("should work on Features of MultiLines") {
       val simpleFeature = GeometryToSimpleFeature(multiLine, Some(crs), nonEmptyList)
-      val actual: MultiLine = simpleFeature.toGeometry[MultiLine]
+      val actual: MultiLineString = simpleFeature.toGeometry[MultiLineString]
       val expected = multiLine
       actual should be (expected)
     }
@@ -91,7 +89,7 @@ class SimpleFeatureToGeometryMethodsSpec
     it("should throw in response to mis-matches") {
       val simpleFeature = GeometryToSimpleFeature(point, Some(crs), nonEmptyList)
       intercept[Exception] {
-        println(simpleFeature.toGeometry[Line])
+        println(simpleFeature.toGeometry[LineString])
       }
     }
   }

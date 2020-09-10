@@ -16,18 +16,13 @@
 
 package geotrellis.raster.io.geotiff
 
-import geotrellis.util._
 import geotrellis.vector.Extent
 import geotrellis.raster._
-import geotrellis.raster.crop._
-import geotrellis.raster.io.geotiff._
-import geotrellis.raster.io.geotiff.reader._
-import geotrellis.raster.io.geotiff.tags._
 import geotrellis.raster.testkit._
 
-import org.scalatest._
-import scala.collection.JavaConversions._
-import monocle.syntax.apply._
+import org.scalatest.BeforeAndAfterAll
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.funspec.AnyFunSpec
 
 object Reader {
   def singleBand(path: String, extent: Extent): (Raster[Tile], Raster[Tile]) = {
@@ -49,12 +44,7 @@ object Reader {
   }
 }
 
-class CroppedGeoTiffSpec extends FunSpec
-  with Matchers
-  with BeforeAndAfterAll
-  with RasterMatchers
-  with GeoTiffTestUtils
-  with TileBuilders {
+class CroppedGeoTiffSpec extends AnyFunSpec with Matchers with BeforeAndAfterAll with RasterMatchers with GeoTiffTestUtils with TileBuilders {
 
   describe("windowed, singleband GeoTiffs") {
     val bitStriped = geoTiffPath("uncompressed/striped/bit.tif")

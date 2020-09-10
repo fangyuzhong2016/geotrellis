@@ -16,19 +16,14 @@
 
 package geotrellis.spark.testkit
 
-import geotrellis.spark._
 import geotrellis.raster._
-import geotrellis.raster.stitch._
-import geotrellis.raster.io.arg.ArgReader
 import geotrellis.raster.io.geotiff._
-
-import java.io.File
-
-import geotrellis.spark.testkit._
+import geotrellis.layer._
+import geotrellis.spark._
 
 import org.apache.spark._
-import org.scalatest._
-import spire.syntax.cfor._
+
+import java.io.File
 
 trait OpAsserter { self: TestEnvironment =>
 
@@ -42,7 +37,7 @@ trait OpAsserter { self: TestEnvironment =>
     sparkOp: TileLayerRDD[SpatialKey] => TileLayerRDD[SpatialKey],
     asserter: (Tile, Tile) => Unit = tilesEqual
   ) = {
-    val tile = SinglebandGeoTiff(new File(inputHomeLocalPath, path).getPath).tile
+    val tile = SinglebandGeoTiff(new File(inputHomeLocalPath, path).getPath).tile.toArrayTile
     testTile(sc, tile, layoutCols, layoutRows)(rasterOp, sparkOp, asserter)
   }
 
@@ -56,7 +51,7 @@ trait OpAsserter { self: TestEnvironment =>
      sparkOp: TileLayerCollection[SpatialKey] => TileLayerCollection[SpatialKey],
      asserter: (Tile, Tile) => Unit = tilesEqual
    ) = {
-    val tile = SinglebandGeoTiff(new File(inputHomeLocalPath, path).getPath).tile
+    val tile = SinglebandGeoTiff(new File(inputHomeLocalPath, path).getPath).tile.toArrayTile
     testTileCollection(sc, tile, layoutCols, layoutRows)(rasterOp, sparkOp, asserter)
   }
 

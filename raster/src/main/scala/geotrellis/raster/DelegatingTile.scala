@@ -26,7 +26,7 @@ package geotrellis.raster
  *
  * @since 8/22/18
  */
-trait DelegatingTile extends Tile {
+abstract class DelegatingTile extends Tile {
   protected def delegate: Tile
 
   def cellType: CellType =
@@ -98,4 +98,5 @@ trait DelegatingTile extends Tile {
   def mapDoubleMapper(mapper: DoubleTileMapper): Tile =
     delegate.mapDoubleMapper(mapper)
 
+  override def toString: String = s"DelegatingTile($cols,$rows,$cellType)"
 }

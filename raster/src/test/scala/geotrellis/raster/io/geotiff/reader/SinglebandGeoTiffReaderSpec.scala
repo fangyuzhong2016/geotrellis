@@ -19,15 +19,12 @@ package geotrellis.raster.io.geotiff.reader
 import geotrellis.raster._
 import geotrellis.raster.io.geotiff._
 import geotrellis.raster.testkit._
-import geotrellis.util.Filesystem
 
 import spire.syntax.cfor._
-import org.scalatest._
 
-class SinglebandGeoTiffReaderSpec extends FunSpec
-    with RasterMatchers
-    with GeoTiffTestUtils {
+import org.scalatest.funspec.AnyFunSpec
 
+class SinglebandGeoTiffReaderSpec extends AnyFunSpec with RasterMatchers with GeoTiffTestUtils {
   def geoTiff(storage: String, cellType: String): SinglebandGeoTiff =
     SinglebandGeoTiff(geoTiffPath(s"uncompressed/$storage/${cellType}.tif"))
 
@@ -137,14 +134,36 @@ class SinglebandGeoTiffReaderSpec extends FunSpec
       }
     }
 
+    it("should read tiff with masks and mask overviews correct (skip everything that is not a reduced image)") {
+      // sizes of overviews, starting with the base ifd
+      val sizes = List(1024 -> 1024, 512 -> 512)
+
+      val tiff = SinglebandGeoTiff(geoTiffPath("overviews/per-dataset-mask.tif"))
+      val tile = tiff.tile
+
+      tiff.getOverviewsCount should be (1)
+      tile.isNoDataTile should be (false)
+
+      tile.cols -> tile.rows should be (sizes(0))
+
+      tiff.overviews.zip(sizes.tail).foreach { case (ovrTiff, ovrSize) =>
+        val ovrTile = ovrTiff.tile
+
+        ovrTiff.getOverviewsCount should be (0)
+        ovrTile.isNoDataTile should be (false)
+
+        ovrTile.cols -> ovrTile.rows should be (ovrSize)
+      }
+    }
+
     it("should pick up the tiff overview correct (AutoHigherResolution test)") {
       def cellSizesSequence(cellSize: CellSize): List[CellSize] = {
         val CellSize(w, h) = cellSize
 
         val seq = for {
-          wp <- (w / 2 + w / 4) until (w - w / 100) by 100
-          hp <- (h / 2 + h / 4) until (h - h / 100) by 100
-        } yield CellSize(wp, hp)
+          wp <- Range.BigDecimal(w / 2 + w / 4, w - w / 100, 100)
+          hp <- Range.BigDecimal(h / 2 + h / 4, h - h / 100, 100)
+        } yield CellSize(wp.toDouble, hp.toDouble)
 
         seq.toList
       }

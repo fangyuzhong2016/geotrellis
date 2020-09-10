@@ -17,17 +17,17 @@
 package geotrellis.spark.filter
 
 import geotrellis.proj4.LatLng
-import geotrellis.raster.{GridBounds, TileLayout, FloatConstantNoDataCellType}
-import geotrellis.raster.io.geotiff.SinglebandGeoTiff
-import geotrellis.spark._
-import geotrellis.spark.io._
-import geotrellis.spark.tiling._
 import geotrellis.vector._
+import geotrellis.layer._
+import geotrellis.raster.{FloatConstantNoDataCellType, GridBounds, TileLayout}
+import geotrellis.raster.io.geotiff.SinglebandGeoTiff
+import geotrellis.store._
+import geotrellis.spark._
 import geotrellis.spark.testkit._
 
-import org.scalatest.FunSpec
+import org.scalatest.funspec.AnyFunSpec
 
-class TileLayerRDDFilterMethodsSpec extends FunSpec with TestEnvironment {
+class TileLayerRDDFilterMethodsSpec extends AnyFunSpec with TestEnvironment {
 
   describe("SpaceTime TileLayerRDD Filter Methods") {
     val rdd = sc.parallelize(List(
@@ -80,7 +80,7 @@ class TileLayerRDDFilterMethodsSpec extends FunSpec with TestEnvironment {
   describe("Spatial TileLayerRDD Filter Methods") {
     val path = "raster/data/aspect.tif"
     val gt = SinglebandGeoTiff(path)
-    val originalRaster = gt.raster.resample(500, 500)
+    val originalRaster = gt.raster.mapTile(_.toArrayTile).resample(500, 500)
     val (_, rdd) = createTileLayerRDD(originalRaster, 5, 5, gt.crs)
     val temporalRdd =
       rdd

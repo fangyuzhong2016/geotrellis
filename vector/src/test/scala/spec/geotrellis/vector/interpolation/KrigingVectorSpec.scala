@@ -16,15 +16,16 @@
 
 package geotrellis.vector.interpolation
 
-import geotrellis.vector.io._
-import geotrellis.vector.io.json.JsonFeatureCollection
-import geotrellis.vector.testkit._
 import geotrellis.vector._
-import spire.syntax.cfor._
-import spray.json.DefaultJsonProtocol._
-import org.scalatest._
+import geotrellis.vector.io.json.JsonFeatureCollection
+import geotrellis.vector._
 
-class KrigingVectorSpec extends FunSpec with Matchers {
+import spire.syntax.cfor._
+
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.funspec.AnyFunSpec
+
+class KrigingVectorSpec extends AnyFunSpec with Matchers {
   def generateLogPoints(pointsData: Array[PointFeature[Double]]): Array[PointFeature[Double]] = {
     (1 to pointsData.length)
       .map { i => PointFeature(pointsData(i - 1).geom, math.log(pointsData(i - 1).data)) }

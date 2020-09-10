@@ -17,11 +17,9 @@
 package geotrellis.raster
 
 import geotrellis.raster.split.Split
-import geotrellis.vector.Extent
 
 import spire.syntax.cfor._
 
-import scala.collection.mutable
 
 /**
   * The companion object for the [[CompositeTile]] type.
@@ -166,9 +164,6 @@ case class CompositeTile(tiles: Seq[Tile],
     if (cols.toLong * rows.toLong > Int.MaxValue.toLong) {
       sys.error("This tiled raster is too big to convert into an array.")
     } else {
-      if(targetCellType.isFloatingPoint != cellType.isFloatingPoint)
-        logger.warn(s"Conversion from $cellType to $targetCellType may lead to data loss.")
-
       val tile = ArrayTile.alloc(targetCellType, cols, rows)
       val len = cols * rows
       val layoutCols = tileLayout.layoutCols
@@ -543,7 +538,7 @@ case class CompositeTile(tiles: Seq[Tile],
   def combine(other: Tile)(f: (Int, Int) => Int): Tile = {
     (this, other).assertEqualDimensions
 
-    val result = ArrayTile.alloc(cellType, cols, rows)
+    val result = ArrayTile.alloc(cellType.union(other.cellType), cols, rows)
     val layoutCols = tileLayout.layoutCols
     val layoutRows = tileLayout.layoutRows
     val tileCols = tileLayout.tileCols

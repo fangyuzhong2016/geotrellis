@@ -16,21 +16,19 @@
 
 package geotrellis.spark.summary
 
+import geotrellis.layer._
 import geotrellis.spark._
-import geotrellis.spark.io.hadoop._
 import geotrellis.spark.testkit.testfiles._
 import geotrellis.spark.testkit._
 
 import geotrellis.raster._
 import geotrellis.raster.io.geotiff._
 
-import geotrellis.vector._
 
-import org.scalatest.FunSpec
+import org.scalatest.funspec.AnyFunSpec
 
-import collection._
 
-class StatsTileRDDMethodsSpec extends FunSpec with TestEnvironment with TestFiles {
+class StatsTileRDDMethodsSpec extends AnyFunSpec with TestEnvironment with TestFiles {
 
   describe("RDD Stats Method Operations") {
 
@@ -106,7 +104,7 @@ class StatsTileRDDMethodsSpec extends FunSpec with TestEnvironment with TestFile
     it ("should find double histogram of aspect and match merged quantile breaks") {
       val path = "raster/data/aspect.tif"
       val gt = SinglebandGeoTiff(path)
-      val originalRaster = gt.raster.resample(500, 500)
+      val originalRaster = gt.raster.mapTile(_.toArrayTile).resample(500, 500)
       val (_, rdd) = createTileLayerRDD(originalRaster, 5, 5, gt.crs)
 
       val hist = rdd.histogram
@@ -118,7 +116,7 @@ class StatsTileRDDMethodsSpec extends FunSpec with TestEnvironment with TestFile
     it ("should be able to sample a fraction of an RDD to compute a histogram") {
       val path = "raster/data/aspect.tif"
       val gt = SinglebandGeoTiff(path)
-      val originalRaster = gt.raster.resample(500, 500)
+      val originalRaster = gt.raster.mapTile(_.toArrayTile).resample(500, 500)
       val (_, rdd) = createTileLayerRDD(originalRaster, 5, 5, gt.crs)
 
       val hist1 = rdd.histogram(72)

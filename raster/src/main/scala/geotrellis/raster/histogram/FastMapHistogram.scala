@@ -16,11 +16,10 @@
 
 package geotrellis.raster.histogram
 
+import cats.Monoid
 import geotrellis.raster._
 
-import scala.math.{ceil, max, min, abs}
 import scala.util.Sorting
-
 import sys.error
 
 
@@ -28,6 +27,13 @@ import sys.error
   * Companion object for the [[FastMapHistogram]] type.
   */
 object FastMapHistogram {
+
+  implicit val fastMapHistogramMonoid: Monoid[FastMapHistogram] =
+    new Monoid[FastMapHistogram] {
+      def empty: FastMapHistogram = FastMapHistogram()
+      def combine(x: FastMapHistogram, y: FastMapHistogram) = x.merge(y)
+    }
+
   private final val UNSET: Int = NODATA + 1
   private final val SIZE = 16
 
@@ -365,7 +371,7 @@ class FastMapHistogram(_size: Int, _buckets: Array[Int], _counts: Array[Long], _
     * the histogram that would result from seeing all of the values
     * seen by the two antecedent histograms).
     */
-  def merge(histogram: Histogram[Int]): Histogram[Int] = {
+  def merge(histogram: Histogram[Int]): FastMapHistogram = {
     val total = FastMapHistogram()
 
     total.update(this); total.update(histogram)

@@ -16,11 +16,11 @@
 
 package geotrellis.raster.distance
 
-import com.vividsolutions.jts.geom.Coordinate
+import org.locationtech.jts.geom.Coordinate
 
 import geotrellis.raster._
 import geotrellis.raster.rasterize.polygon.PolygonRasterizer
-import geotrellis.vector.{Point, Polygon}
+import geotrellis.vector._
 import geotrellis.vector.voronoi._
 
 import scala.math.sqrt
@@ -40,8 +40,8 @@ object EuclideanDistanceTile {
     val (poly, coord) = arg
 
     try {
-      val buffered = poly.buffer(math.max(rasterExtent.cellwidth, rasterExtent.cellheight))
-      PolygonRasterizer.foreachCellByPolygon(buffered, rasterExtent)(fillFn(rasterExtent, tile, Point.jtsCoord2Point(coord)))
+      val buffered = poly.buffer(math.max(rasterExtent.cellwidth, rasterExtent.cellheight)).asInstanceOf[Polygon]
+      PolygonRasterizer.foreachCellByPolygon(buffered, rasterExtent)(fillFn(rasterExtent, tile, Point(coord)))
     } catch {
       case e: Throwable => println(s"Error when handling ${poly}: ${e.getMessage}")
     }

@@ -23,14 +23,14 @@ import geotrellis.spark._
 import geotrellis.vector.Extent
 import geotrellis.spark.testkit._
 
-import org.scalatest.FunSpec
+import org.scalatest.funspec.AnyFunSpec
 
-class TileLayerRDDCropMethodsSpec extends FunSpec with TestEnvironment {
+class TileLayerRDDCropMethodsSpec extends AnyFunSpec with TestEnvironment {
 
   describe("TileLayerRDD Crop Methods") {
     val path = "raster/data/aspect.tif"
     val gt = SinglebandGeoTiff(path)
-    val originalRaster = gt.raster.resample(500, 500)
+    val originalRaster = gt.raster.mapTile(_.toArrayTile).resample(500, 500)
     val (_, rdd) = createTileLayerRDD(originalRaster, 5, 5, gt.crs)
     val md = rdd.metadata
     val overall = md.extent

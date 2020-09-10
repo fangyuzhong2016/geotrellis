@@ -23,7 +23,7 @@ import spire.syntax.cfor._
   * tile.  Designed to be a near drop-in replacement for Array in many
   * cases.
   */
-trait ArrayTile extends Tile with Serializable {
+abstract class ArrayTile extends Tile with Serializable {
 
   /**
     * Return the [[ArrayTile]] equivalent of this ArrayTile.
@@ -41,9 +41,6 @@ trait ArrayTile extends Tile with Serializable {
     */
   def convert(targetCellType: CellType): ArrayTile = {
     val tile = ArrayTile.alloc(targetCellType, cols, rows)
-
-    if(targetCellType.isFloatingPoint != cellType.isFloatingPoint)
-      logger.debug(s"Conversion from $cellType to $targetCellType may lead to data loss.")
 
     if(!cellType.isFloatingPoint) {
       cfor(0)(_ < rows, _ + 1) { row =>
@@ -273,11 +270,11 @@ trait ArrayTile extends Tile with Serializable {
       case ar: ArrayTile =>
         combineDouble(ar)(f)
       case ct: ConstantTile =>
-        ct.combineDouble(this)(f)
+        ct.combineDouble(this)((z1, z2) => f(z2, z1))
       case ct: CompositeTile =>
         ct.combineDouble(this)((z1, z2) => f(z2, z1))
       case t =>
-        this.mapDouble((col, row, z) => f(z, t.get(col, row)))
+        this.mapDouble((col, row, z) => f(z, t.getDouble(col, row)))
     }
   }
 
@@ -289,15 +286,29 @@ trait ArrayTile extends Tile with Serializable {
     * @return         A boolean
     */
   override def equals(other: Any): Boolean = other match {
-    case r: ArrayTile => {
-      if (r == null) return false
-      val len = size
-      if (len != r.size) return false
+    case tile: ArrayTile => {
+      if (tile == null) return false
+      if (tile.cols != cols || tile.rows != rows) return false
+      if (tile.cellType != cellType) return false
+
       var i = 0
-      while (i < len) {
-        if (apply(i) != r(i)) return false
-        i += 1
-      }
+
+      if (cellType.isFloatingPoint)
+        while (i < size) {
+          val value = applyDouble(i)
+          val otherValue = tile.applyDouble(i)
+
+          // if both values are not NaNs and are not equal
+          if (!java.lang.Double.isNaN(value) && !java.lang.Double.isNaN(otherValue) && (value != otherValue)) return false
+          // if one of the values is a NaN
+          if((!java.lang.Double.isNaN(value) && java.lang.Double.isNaN(otherValue)) || java.lang.Double.isNaN(value) && !java.lang.Double.isNaN(otherValue)) return false
+          i += 1
+        }
+      else
+        while (i < size) {
+          if (apply(i) != tile(i)) return false
+          i += 1
+        }
       true
     }
     case _ => false
@@ -393,6 +404,8 @@ trait ArrayTile extends Tile with Serializable {
     }
     arr
   }
+
+  override def toString: String = s"ArrayTile($cols,$rows,$cellType)"
 }
 
 /**

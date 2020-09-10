@@ -16,8 +16,7 @@
 
 package geotrellis.vector.triangulation
 
-import com.vividsolutions.jts.geom.Coordinate
-import geotrellis.vector.{Line, MultiLine, Point}
+import geotrellis.vector.LineString
 import geotrellis.vector.RobustPredicates.{LEFTOF, ON, RIGHTOF}
 import geotrellis.vector.mesh.{HalfEdgeTable, IndexedPointSet}
 
@@ -195,7 +194,7 @@ final class DelaunayStitcher(
       }
     }
 
-    val allEs = collection.mutable.Set.empty[Line]
+    val allEs = collection.mutable.Set.empty[LineString]
 
     var continue = true
     while(continue) {
@@ -233,7 +232,7 @@ final class DelaunayStitcher(
           setNext(getPrev(lcand), getFlip(base))
           killEdge(getFlip(lcand))
           killEdge(lcand)
-          
+
           lcand = e
 
           if (debug) {

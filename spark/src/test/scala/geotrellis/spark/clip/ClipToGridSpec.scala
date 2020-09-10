@@ -17,17 +17,16 @@
 package geotrellis.spark.clip
 
 import geotrellis.raster.TileLayout
-import geotrellis.spark._
-import geotrellis.spark.tiling._
+import geotrellis.layer._
 import geotrellis.spark.testkit._
 import geotrellis.vector._
 import geotrellis.vector.testkit._
 
 import org.apache.spark.rdd.RDD
 
-import org.scalatest.FunSpec
+import org.scalatest.funspec.AnyFunSpec
 
-class ClipToGridSpec extends FunSpec with TestEnvironment {
+class ClipToGridSpec extends AnyFunSpec with TestEnvironment {
   describe("ClipToGrid") {
     val layoutDefinition =
       LayoutDefinition(
@@ -47,8 +46,8 @@ class ClipToGridSpec extends FunSpec with TestEnvironment {
       for((k, resultGeoms) <- resultMap) {
         val expectedGeoms = expectedMap(k)
 
-        resultGeoms.sortBy { g => (g.envelope.xmin, g.envelope.ymax) }
-          .zip(expectedGeoms.sortBy { g => (g.envelope.xmin, g.envelope.ymax) })
+        resultGeoms.sortBy { g => (g.extent.xmin, g.extent.ymax) }
+          .zip(expectedGeoms.sortBy { g => (g.extent.xmin, g.extent.ymax) })
           .foreach { case (g1, g2) =>
             withClue(s"Failed for $k:") {
               g1 should matchGeom (g2, 0.0001)
@@ -74,7 +73,7 @@ class ClipToGridSpec extends FunSpec with TestEnvironment {
       val p3 = Point(0, 0)
 
       val rdd = sc.parallelize(Array(MultiPoint(p1, p2, p3)))
-      val result = ClipToGrid(rdd, layoutDefinition).collect().toVector.sortBy(_._2.envelope.ymin)
+      val result = ClipToGrid(rdd, layoutDefinition).collect().toVector.sortBy(_._2.extent.ymin)
       result.size should be (2)
       result(0)._1 should be (SpatialKey(0, 5))
       result(0)._2 should be (an[MultiPoint])
@@ -85,7 +84,7 @@ class ClipToGridSpec extends FunSpec with TestEnvironment {
 
     it("should clip a line") {
       val line =
-        Line(
+        LineString(
           (1.5, -14.2),
           (1.5, -12.5),
           (2.6, -12.5),
@@ -98,13 +97,13 @@ class ClipToGridSpec extends FunSpec with TestEnvironment {
 
       checkCorrect(actual,
         Vector(
-          (SpatialKey(1, 6), Line((1.5, -14.0), (1.5, -12.5), (2.0, -12.5))),
-          (SpatialKey(2, 6), Line((2.0, -12.5), (2.6, -12.5), (2.6, -14.0))),
-          (SpatialKey(2, 7), Line((2.6, -14.0), (2.6, -15.1), (2.0, -15.1))),
+          (SpatialKey(1, 6), LineString((1.5, -14.0), (1.5, -12.5), (2.0, -12.5))),
+          (SpatialKey(2, 6), LineString((2.0, -12.5), (2.6, -12.5), (2.6, -14.0))),
+          (SpatialKey(2, 7), LineString((2.6, -14.0), (2.6, -15.1), (2.0, -15.1))),
           (SpatialKey(1, 7),
-            MultiLine(
-              Line((2.0, -15.1), (1.6, -15.1)),
-              Line((1.5, -14.2), (1.5, -14.0))
+            MultiLineString(
+              LineString((2.0, -15.1), (1.6, -15.1)),
+              LineString((1.5, -14.2), (1.5, -14.0))
             )
           )
         )
@@ -114,7 +113,7 @@ class ClipToGridSpec extends FunSpec with TestEnvironment {
 
     it("should clip a line contained in one key") {
       val line =
-        Line(
+        LineString(
           (1.5, -14.2),
           (1.5, -14.1),
           (1.6, -14.1),
@@ -130,7 +129,7 @@ class ClipToGridSpec extends FunSpec with TestEnvironment {
 
     it("should clip a polygon") {
       val shell =
-        Line(
+        LineString(
           (1.5, -3.0),
           (6.5, -3.0),
           (6.5, -19.0),
@@ -139,7 +138,7 @@ class ClipToGridSpec extends FunSpec with TestEnvironment {
         )
 
       val hole =
-        Line(
+        LineString(
           (3.5, -7.0),
           (5.5, -7.0),
           (5.5, -15.0),
@@ -150,8 +149,8 @@ class ClipToGridSpec extends FunSpec with TestEnvironment {
       val poly =
         Polygon(shell, hole)
 
-      val shellExtent = Polygon(shell).envelope
-      val holeExtent = Polygon(hole).envelope
+      val shellExtent = Polygon(shell).extent
+      val holeExtent = Polygon(hole).extent
 
       def outerPoly(k: SpatialKey): Polygon =
         try {

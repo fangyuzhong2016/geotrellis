@@ -18,18 +18,16 @@ package geotrellis.geotools
 
 import geotrellis.raster._
 import geotrellis.raster.io.geotiff._
-import geotrellis.vector._
 import geotrellis.vector.testkit._
 
 import javax.media.jai.iterator.RectIterFactory
 import org.geotools.coverage.grid._
-import org.geotools.coverage.grid.io._
 import org.geotools.gce.geotiff._
-import org.opengis.parameter.GeneralParameterValue
-import org.scalatest._
-import spire.syntax.cfor._
 
-class GridCoverage2DConvertersSpec extends FunSpec with Matchers with GeoTiffTestUtils {
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.funspec.AnyFunSpec
+
+class GridCoverage2DConvertersSpec extends AnyFunSpec with Matchers with GeoTiffTestUtils {
 
   case class TestFile(description: String, path: String, isMultiband: Boolean) {
     def gridCoverage2D: GridCoverage2D =

@@ -16,14 +16,14 @@
 
 package geotrellis.vector.voronoi
 
-import com.vividsolutions.jts.geom.Coordinate
+import org.locationtech.jts.geom.Coordinate
 import org.apache.commons.math3.linear._
 import geotrellis.vector._
 import geotrellis.vector.mesh.HalfEdgeTable
 import geotrellis.vector.triangulation._
 
-import scala.collection.mutable.{ListBuffer, Map}
-import scala.math.{abs, max, sqrt}
+import scala.collection.mutable.ListBuffer
+import scala.math.{abs, sqrt}
 import spire.syntax.cfor._
 
 object VoronoiDiagram {
@@ -185,7 +185,7 @@ object VoronoiDiagram {
       None
     } else {
       clippedCorners += clippedCorners.head
-      val poly = Polygon(clippedCorners.map(Point.jtsCoord2Point(_)))
+      val poly = Polygon(clippedCorners.map(Point(_)))
       Some(poly)
     }
   }

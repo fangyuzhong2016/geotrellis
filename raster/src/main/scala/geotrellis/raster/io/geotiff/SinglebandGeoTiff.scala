@@ -18,14 +18,11 @@ package geotrellis.raster.io.geotiff
 
 import geotrellis.util.ByteReader
 import geotrellis.raster._
-import geotrellis.raster.io.geotiff.reader.GeoTiffReader
 import geotrellis.vector.Extent
 import geotrellis.proj4.CRS
 import geotrellis.raster.crop.Crop
 import geotrellis.raster.resample.ResampleMethod
-import spire.syntax.cfor._
 
-import java.nio.ByteBuffer
 
 case class SinglebandGeoTiff(
   tile: Tile,
@@ -68,7 +65,7 @@ case class SinglebandGeoTiff(
     SinglebandGeoTiff(raster.tile, raster.extent, this.crs, this.tags, this.options, this.overviews)
   }
 
-  def crop(gridBounds: GridBounds): SinglebandGeoTiff =
+  def crop(gridBounds: GridBounds[Int]): SinglebandGeoTiff =
     crop(gridBounds.colMin, gridBounds.rowMin, gridBounds.colMax, gridBounds.rowMax)
 
   def crop(subExtent: Extent): SinglebandGeoTiff = crop(subExtent, Crop.Options.DEFAULT)
@@ -78,7 +75,7 @@ case class SinglebandGeoTiff(
       .crop(subExtent, Crop.Options(clamp = false))
       .resample(RasterExtent(subExtent, cellSize), resampleMethod, strategy)
 
-  def crop(windows: Seq[GridBounds]): Iterator[(GridBounds, Tile)] = tile match {
+  def crop(windows: Seq[GridBounds[Int]]): Iterator[(GridBounds[Int], Tile)] = tile match {
     case geotiffTile: GeoTiffTile => geotiffTile.crop(windows)
     case arrayTile: Tile => arrayTile.crop(windows)
   }

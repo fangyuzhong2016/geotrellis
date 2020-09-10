@@ -19,27 +19,25 @@ package geotrellis.geotools
 import geotrellis.proj4.LatLng
 import geotrellis.vector._
 
-import org.scalatest._
-
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.funspec.AnyFunSpec
 
 object SimpleFeatureToFeatureMethodsSpec {
   case class Foo(x: Int, y: String)
   implicit def mapToFoo(map: Map[String, Any]): Foo = Foo(42, "72")
 }
 
-class SimpleFeatureToFeatureMethodsSpec
-    extends FunSpec
-    with Matchers {
+class SimpleFeatureToFeatureMethodsSpec extends AnyFunSpec with Matchers {
 
   import SimpleFeatureToFeatureMethodsSpec._
 
   describe("The .toFeature Extension Methods") {
 
     val point = Point(0, 1)
-    val line = Line(Point(0, 0), Point(3, 3))
+    val line = LineString(Point(0, 0), Point(3, 3))
     val polygon = Polygon(Point(0, 0), Point(4, 0), Point(0, 3), Point(0, 0))
     val multiPoint = MultiPoint(Point(0, 0), Point(4, 0), Point(0, 3), Point(0, 0))
-    val multiLine = MultiLine(Line(Point(0, 0), Point(4, 0)), Line(Point(0, 3), Point(0, 0)))
+    val multiLine = MultiLineString(LineString(Point(0, 0), Point(4, 0)), LineString(Point(0, 3), Point(0, 0)))
     val multiPolygon = MultiPolygon(Polygon(Point(0, 0), Point(5, 0), Point(0, 12), Point(0, 0)))
 
     val crs = LatLng
@@ -55,7 +53,7 @@ class SimpleFeatureToFeatureMethodsSpec
 
     it("should work on Features of Lines") {
       val simpleFeature = GeometryToSimpleFeature(line, Some(crs), nonEmptyList)
-      val actual: Feature[Line, Map[String, Any]] = simpleFeature.toFeature[Line]
+      val actual: Feature[LineString, Map[String, Any]] = simpleFeature.toFeature[LineString]
       val expected = Feature(line, map)
       actual should be (expected)
     }
@@ -76,7 +74,7 @@ class SimpleFeatureToFeatureMethodsSpec
 
     it("should work on Features of MultiLines") {
       val simpleFeature = GeometryToSimpleFeature(multiLine, Some(crs), nonEmptyList)
-      val actual: Feature[MultiLine, Map[String, Any]] = simpleFeature.toFeature[MultiLine]
+      val actual: Feature[MultiLineString, Map[String, Any]] = simpleFeature.toFeature[MultiLineString]
       val expected = Feature(multiLine, map)
       actual should be (expected)
     }
@@ -98,7 +96,7 @@ class SimpleFeatureToFeatureMethodsSpec
     it("should throw in response to mis-matches") {
       val simpleFeature = GeometryToSimpleFeature(point, Some(crs), nonEmptyList)
       intercept[Exception] {
-        println(simpleFeature.toFeature[Line])
+        println(simpleFeature.toFeature[LineString])
       }
     }
 

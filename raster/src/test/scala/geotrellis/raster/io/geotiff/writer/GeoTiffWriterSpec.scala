@@ -24,15 +24,14 @@ import geotrellis.raster.io.geotiff.tags.codes.ColorSpace
 import geotrellis.raster.render.{ColorRamps, IndexedColorMap}
 import geotrellis.raster.testkit._
 import geotrellis.vector.Extent
-import org.scalatest._
+
 import java.io._
 
-class GeoTiffWriterSpec extends FunSpec
-    with Matchers
-    with BeforeAndAfterAll
-    with RasterMatchers
-    with TileBuilders
-    with GeoTiffTestUtils {
+import org.scalatest.{BeforeAndAfterAll, Inspectors}
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.funspec.AnyFunSpec
+
+class GeoTiffWriterSpec extends AnyFunSpec with Matchers with BeforeAndAfterAll with RasterMatchers with TileBuilders with GeoTiffTestUtils {
 
   override def afterAll = purge
 
@@ -148,6 +147,16 @@ class GeoTiffWriterSpec extends FunSpec
       actualCRS.toProj4String should be (geoTiff.crs.toProj4String)
     }
 
+    it ("should write web mercator with no epsg code correctly") {
+      val geoTiff = MultibandGeoTiff(geoTiffPath("ndvi-web-mercator.tif"))
+
+      addToPurge(path)
+      GeoTiff(geoTiff.raster, CRS.fromString(geoTiff.crs.toProj4String)).write(path)
+      val actualCRS = SinglebandGeoTiff(path).crs
+
+      actualCRS.toProj4String should be (geoTiff.crs.toProj4String)
+    }
+
     it("should write floating point rasters correctly") {
       val t = DoubleArrayTile(Array(11.0, 22.0, 33.0, 44.0), 2, 2)
 
@@ -211,7 +220,7 @@ class GeoTiffWriterSpec extends FunSpec
 
       addToPurge(path)
 
-      val tags = TiffTags(path)
+      val tags = TiffTags.read(path)
       tags.compression should be (geotrellis.raster.io.geotiff.tags.codes.CompressionType.ZLibCoded)
 
       val gt = MultibandGeoTiff(path)
@@ -247,7 +256,7 @@ class GeoTiffWriterSpec extends FunSpec
       gt.crs should equal (geoTiff.crs)
       gt.tile.bandCount should equal (tile.bandCount)
       for(i <- 0 until gt.tile.bandCount) {
-        val actualBand = gt.band(i)
+        val actualBand = gt.tile.band(i)
         val expectedBand = tile.band(i)
 
         assertEqual(actualBand, expectedBand)

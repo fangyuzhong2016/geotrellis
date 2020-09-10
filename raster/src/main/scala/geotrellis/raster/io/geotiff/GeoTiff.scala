@@ -51,7 +51,7 @@ trait GeoTiffData {
  * Base trait of GeoTiff. Takes a tile that is of a type equal to or a subtype
  * of CellGrid
  */
-trait GeoTiff[T <: CellGrid] extends GeoTiffData {
+trait GeoTiff[T <: CellGrid[Int]] extends GeoTiffData {
   def tile: T
 
   def cols: Int = tile.cols
@@ -91,38 +91,24 @@ trait GeoTiff[T <: CellGrid] extends GeoTiffData {
 
   /** Chooses the best matching overviews and makes resample & crop */
   def crop(subExtent: Extent, cellSize: CellSize, resampleMethod: ResampleMethod, strategy: OverviewStrategy): Raster[T]
-  def crop(subExtent: Extent, cellSize: CellSize): Raster[T] = crop(subExtent, cellSize, NearestNeighbor, AutoHigherResolution)
+  def crop(subExtent: Extent, cellSize: CellSize): Raster[T] = crop(subExtent, cellSize, NearestNeighbor, OverviewStrategy.DEFAULT)
   def crop(rasterExtent: RasterExtent): Raster[T] = crop(rasterExtent.extent, rasterExtent.cellSize)
 
   def crop(subExtent: Extent, options: Crop.Options): GeoTiff[T]
   def crop(subExtent: Extent): GeoTiff[T]
   def crop(colMax: Int, rowMax: Int): GeoTiff[T]
   def crop(colMin: Int, rowMin: Int, colMax: Int, rowMax: Int): GeoTiff[T]
-  def crop(gridBounds: GridBounds): GeoTiff[T]
-  def crop(windows: Seq[GridBounds]): Iterator[(GridBounds, T)]
+  def crop(gridBounds: GridBounds[Int]): GeoTiff[T]
+  def crop(windows: Seq[GridBounds[Int]]): Iterator[(GridBounds[Int], T)]
 
   /** Return the best matching overview to the given cellSize, returns "this" if no overviews available. */
-  def getClosestOverview(cellSize: CellSize, strategy: OverviewStrategy = AutoHigherResolution): GeoTiff[T] = {
+  def getClosestOverview(cellSize: CellSize, strategy: OverviewStrategy = OverviewStrategy.DEFAULT): GeoTiff[T] = {
     overviews match {
       case Nil => this
       case list =>
-        strategy match {
-          case AutoHigherResolution =>
-            (this :: list) // overviews can have erased extent information
-              .map { v => (cellSize.resolution - v.cellSize.resolution) -> v }
-              .filter(_._1 >= 0)
-              .sortBy(_._1)
-              .map(_._2)
-              .headOption
-              .getOrElse(this)
-          case Auto(n) =>
-            (this :: list) // overviews can have erased extent information
-              .sortBy(v => math.abs(cellSize.resolution - v.cellSize.resolution))
-              .lift(n)
-              .getOrElse(this) // n can be out of bounds,
-          // makes only overview lookup as overview position is important
-          case Base => this
-        }
+        val availableViews = this :: list
+        val sourceCS = OverviewStrategy.selectOverview(availableViews.map(_.cellSize), cellSize, strategy)
+        availableViews(sourceCS)
     }
   }
 

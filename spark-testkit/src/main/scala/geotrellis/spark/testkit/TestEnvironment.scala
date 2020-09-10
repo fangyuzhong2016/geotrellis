@@ -16,9 +16,9 @@
 
 package geotrellis.spark.testkit
 
-import geotrellis.spark.io.hadoop.HdfsUtils
+import geotrellis.store.hadoop.util.HdfsUtils
 import geotrellis.spark.util.SparkUtils
-import geotrellis.spark.io.kryo.KryoRegistrator
+import geotrellis.spark.store.kryo.KryoRegistrator
 
 import org.apache.hadoop.fs.FileSystem
 import org.apache.hadoop.fs.FileUtil
@@ -55,7 +55,7 @@ trait TestEnvironment extends BeforeAndAfterAll
 { self: Suite with BeforeAndAfterAll =>
 
   /** Subclasses can override this to change the Spark master specification */
-  def sparkMaster = "local"
+  def sparkMaster = "local[2]"
 
   private lazy val afterAlls = mutable.ListBuffer[() => Unit]()
   def registerAfterAll(f: () => Unit): Unit =
